@@ -8,13 +8,13 @@ import adminRoutes from "./routes/adminRoutes.js";
 import { PORT } from "./config/env.js";
 
 const app = express();
+app.use(express.json());
 
 app.use(
   cors({
     origin: "*",
   })
 );
-app.use(express.json());
 
 // Rotas
 app.use("/api/auth", authRoutes);

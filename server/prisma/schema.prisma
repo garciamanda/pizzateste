@@ -3,28 +3,25 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model order {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  pizzaId   Int
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  pizzaId   String   @db.ObjectId
   quantity  Int
   total     Float
   status    String   @default("pending")
   createdAt DateTime @default(now())
-  pizza     pizza    @relation(fields: [pizzaId], references: [id], onDelete: Cascade, map: "Order_pizzaId_fkey")
-  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Order_userId_fkey")
-
-  @@index([pizzaId], map: "Order_pizzaId_fkey")
-  @@index([userId], map: "Order_userId_fkey")
+  pizza     pizza    @relation(fields: [pizzaId], references: [id], onDelete: Cascade)
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model pizza {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique(map: "Pizza_name_key")
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String  @unique
   description String
   price       Float
   imageUrl    String
@@ -32,23 +29,21 @@ model pizza {
 }
 
 model token {
-  id        Int      @id @default(autoincrement())
-  token     String   @unique(map: "Token_token_key") @db.VarChar(255)
-  userId    Int
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  token     String   @unique @db.String
+  userId    String   @db.ObjectId
   createdAt DateTime @default(now())
-  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Token_userId_fkey")
-
-  @@index([userId], map: "Token_userId_fkey")
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model user {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique(map: "User_email_key")
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  email    String  @unique
   name     String
   password String?
   avatar   String?
   role     String  @default("user")
-  googleId String? @unique(map: "User_googleId_key")
+  googleId String? @unique
   order    order[]
   token    token[]
 }
