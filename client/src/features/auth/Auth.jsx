@@ -1,9 +1,10 @@
 import api from "../../services/api";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { UserContext } from "../../contexts/UserContext";
 
-function AuthModal({ modalOpen, setModalOpen, handleLogin, handleSignup }) {
+function AuthModal({ modalOpen, setModalOpen }) {
   const [isLogin, setIsLogin] = useState(true);
   const emailRef = useRef();
   const passwordRef = useRef();
@@ -11,6 +12,8 @@ function AuthModal({ modalOpen, setModalOpen, handleLogin, handleSignup }) {
   const formRef = useRef();
 
   const navigate = useNavigate();
+
+  const { fetchUserData } = useContext(UserContext);
 
   async function handleLoginSubmit(e) {
     e.preventDefault();
@@ -22,16 +25,11 @@ function AuthModal({ modalOpen, setModalOpen, handleLogin, handleSignup }) {
       });
 
       localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("userRole", data.role);
 
-      if (data.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
+      await fetchUserData();
 
-      window.location.reload();
       setModalOpen(false);
+      navigate("/"); 
     } catch (error) {
       console.error(
         "Erro ao fazer login:",
@@ -54,11 +52,11 @@ function AuthModal({ modalOpen, setModalOpen, handleLogin, handleSignup }) {
       const { data } = await api.post("/auth/register", formData);
 
       localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("userRole", data.role);
 
-      handleLogin(emailRef.current.value, passwordRef.current.value);
+      await fetchUserData();
 
       setModalOpen(false);
+      navigate("/"); 
     } catch (error) {
       alert("Erro ao cadastrar");
       console.error(
@@ -70,19 +68,16 @@ function AuthModal({ modalOpen, setModalOpen, handleLogin, handleSignup }) {
 
   const handleGoogleLogin = async (response) => {
     try {
-      console.log("Google login response:", response);
       const googleToken = response.credential;
 
-      console.log("Google token:", googleToken);
-
       const { data } = await api.post("/auth/google", { token: googleToken });
-      console.log("API response data:", data);
 
       localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("userRole", data.role);
 
-      window.location.reload();
+      await fetchUserData();
+
       setModalOpen(false);
+      navigate("/"); 
     } catch (error) {
       alert("Erro ao autenticar com o Google");
       console.error(
@@ -139,14 +134,12 @@ function AuthModal({ modalOpen, setModalOpen, handleLogin, handleSignup }) {
             onSubmit={isLogin ? handleLoginSubmit : handleSignupSubmit}
           >
             {!isLogin && (
-              <>
-                <input
-                  type="text"
-                  placeholder="Nome"
-                  className="w-full text-gray-400 px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
-                  ref={nameRef}
-                />
-              </>
+              <input
+                type="text"
+                placeholder="Nome"
+                className="w-full text-gray-400 px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
+                ref={nameRef}
+              />
             )}
             <input
               type="text"
