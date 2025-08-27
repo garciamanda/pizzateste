@@ -19,15 +19,13 @@ export const updateUserRole = async (req, res) => {
 
   try {
     const updatedUser = await prisma.user.update({
-      where: { id: Number(userId) },
+      where: { id: userId },
       data: { role },
     });
 
-    if (updatedUser.role === role) {
-      res.status(400).json({ error: "Role ja existe." });
-    }
     res.json(updatedUser);
   } catch (err) {
+    console.error("Erro ao atualizar role:", err);
     res.status(500).json({ error: "Erro ao atualizar role do usuário." });
   }
 };
