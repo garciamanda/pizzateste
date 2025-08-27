@@ -18,30 +18,17 @@ export const updateUserRole = async (req, res) => {
   const { role } = req.body;
 
   try {
-    const existingUser = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!existingUser) {
-      return res.status(404).json({ error: "Usuário não encontrado." });
-    }
-
-    if (existingUser.role === role) {
-      return res
-        .status(400)
-        .json({ error: "Role já está definida como essa." });
-    }
-
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
+      where: { id: Number(userId) },
       data: { role },
     });
 
+    if (updatedUser.role === role) {
+      res.status(400).json({ error: "Role ja existe." });
+    }
     res.json(updatedUser);
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: err.message || "Erro ao atualizar role do usuário." });
+    res.status(500).json({ error: "Erro ao atualizar role do usuário." });
   }
 };
 

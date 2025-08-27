@@ -14,36 +14,41 @@ model order {
   quantity  Int
   total     Float
   status    String   @default("pending")
-  createdAt DateTime @default(now())
-  pizza     pizza    @relation(fields: [pizzaId], references: [id], onDelete: Cascade)
-  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @db.Date
+  pizza     pizza    @relation(fields: [pizzaId], references: [id])
+  user      user     @relation(fields: [userId], references: [id])
+
+  @@index([pizzaId], map: "Order_pizzaId_fkey")
+  @@index([userId], map: "Order_userId_fkey")
 }
 
 model pizza {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  name        String  @unique
+  name        String  @unique(map: "Pizza_name_key")
   description String
   price       Float
   imageUrl    String
-  order       order[]
+  orders      order[]
 }
 
 model token {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  token     String   @unique @db.String
+  token     String   @unique
   userId    String   @db.ObjectId
-  createdAt DateTime @default(now())
-  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @db.Date
+  user      user     @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "Token_userId_fkey")
 }
 
 model user {
   id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  email    String  @unique
+  email    String  @unique(map: "User_email_key")
   name     String
   password String?
   avatar   String?
   role     String  @default("user")
-  googleId String? @unique
-  order    order[]
-  token    token[]
+  googleId String?
+  orders   order[]
+  tokens   token[]
 }

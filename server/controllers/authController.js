@@ -55,7 +55,7 @@ export const login = async (req, res) => {
       where: { email },
     });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user || !bcrypt.compare(password, user.password)) {
       return res.status(401).json({ error: "Credenciais inválidas." });
     }
 
